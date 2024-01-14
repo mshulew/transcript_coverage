@@ -166,7 +166,7 @@ process filterBam {
    -o ./transcript_counts \
    -R BAM ${bam} 
   samtools view -H *featureCounts.bam > header.sam
-  samtools view *featureCounts.bam | grep 'Assigned' | awk 'sqrt(\$9^2) < 1000' > body.sam
+  samtools view -F 8 *.featureCounts.bam | grep 'XS:Z:Assigned' | awk 'sqrt($9^2) < 1000' > body.sam
   cat header.sam body.sam | samtools view -Sb | samtools sort > filtered.bam
   sambamba index -t ${task.cpus} filtered.bam
   """
@@ -186,8 +186,9 @@ process transcriptCoverage {
   file '*.tsv' into fullcoverage_ch
     
   script:
+  strand = params.reverseStrand ? "-S" : "-s"
   """
-  bedtools coverage -a $top_bed -b $top_bam -s -d > bedtools_coverage
+  bedtools coverage -a $top_bed -b $top_bam $strand -d > bedtools_coverage
   awk 'BEGIN {FS="\t";OFS="\t"} { print \$1, \$2 + \$7 - 1, \$4, \$5, \$8 }' bedtools_coverage | sort -k1,1 -k2n,2 > ${namingprefix}_coverage_by_base.tsv
   """
 }
@@ -204,8 +205,8 @@ process foldCoverage {
     
   script:
   """
- python3.9 /opt/biorad/src/foldCoverage.py $fullcoverage ${namingprefix}_foldcoverage.tsv 
- mv stats ${namingprefix}_stats.tsv
+  python3.9 /opt/biorad/src/foldCoverage.py $fullcoverage ${namingprefix}_foldcoverage.tsv 
+  mv stats ${namingprefix}_stats.tsv
   """
 }
 
