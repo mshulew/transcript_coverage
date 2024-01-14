@@ -1,8 +1,8 @@
-# Gene Coverage LSG0038
+# Transcript Coverage LSG0038
 
 This pipeline was developed as a companion to gene_coverage_lsg0038 to support SEQuoia Express. It calculates the percent of bases of the top 1,000 expressed transcripts at different read coverages (0x - 20X). This pipeline was used in verification and validation and is being archived for reference. See improvements for bugs fixes for future use.
 
-Author: Mark Shulewitz (mark_shulewitz@bio-rad.com) 
+Author: Mark Shulewitz 
 
 ## Description of pipeline
 ### assignTranscripts
@@ -85,8 +85,3 @@ It is possible to run this pipeline without Docker. Dockerfile can be used as a 
 
 - The bash script topgene.sh can be used to compare the top 1,000 genes between processed data sets. 
 - The bash script batchprocess.sh can be used to sequentially process multiple SEQuoia Express Toolkit outputs.
-
-## Improvements
-1. In the filterBam process, the featureCounts output BAM file is not correctly filtered for Assiged reads. In addition, reads with unmapped mates should be removed. samtools view *.featureCounts.bam | grep 'Assigned' | awk 'sqrt(\$9^2) < 1000' > body.sam should changed to samtools view -F 8 *.featureCounts.bam | grep 'XS:Z:Assigned' | awk 'sqrt(\$9^2) < 1000' > body.sam  
-2. The transcriptCoverage process is not strand specific. Add strand = params.reverseStrand ? "-S" : "-s" as the first line in the script block
-3. Update bedtools coverage -a $top_bed -b $top_bam -s -d > bedtools_coverage to bedtools coverage -a $top_bed -b $top_bam $strand -d > bedtools_coverage
