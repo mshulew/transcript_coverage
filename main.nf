@@ -166,7 +166,7 @@ process filterBam {
    -o ./transcript_counts \
    -R BAM ${bam} 
   samtools view -H *featureCounts.bam > header.sam
-  samtools view -F 8 *.featureCounts.bam | grep 'XS:Z:Assigned' | awk 'sqrt($9^2) < 1000' > body.sam
+  samtools view -F 8 *.featureCounts.bam | grep 'XS:Z:Assigned' | awk 'sqrt(\$9^2) < 1000' > body.sam
   cat header.sam body.sam | samtools view -Sb | samtools sort > filtered.bam
   sambamba index -t ${task.cpus} filtered.bam
   """
