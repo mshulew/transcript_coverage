@@ -15,12 +15,23 @@ RUN apt-get update && apt-get install -y \
     python3-pip
     
 ######### Python 3.9 #############   
-RUN apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        software-properties-common \
-    && add-apt-repository -y ppa:deadsnakes \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        python3.9
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libncurses5-dev \
+    libgdbm-dev \
+    libnss3-dev \
+    libssl-dev \
+    libreadline-dev \
+    libffi-dev \
+    software-properties-common
+RUN wget https://www.python.org/ftp/python/3.9.0/Python-3.9.0.tar.xz && tar -xf Python-3.9.0.tar.xz
+WORKDIR Python-3.9.0
+RUN ls
+RUN ./configure
+RUN make altinstall
+WORKDIR ..
+RUN rm -r Python-3.9.0
+RUN rm Python-3.9.0.tar.xz
 
 ######### Subread Setup #############
 ENV SUBREAD_VERSION 1.6.4 
