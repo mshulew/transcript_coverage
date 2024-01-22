@@ -28,8 +28,9 @@ if (params.help){
 }
 
 //include modules containing processes
-include { assignTranscripts }   from './modules/assignTranscripts'
 include { transcriptList }      from './modules/transcriptList'
+include { assignGenes }         from './modules/assignGenes'
+include { assignTranscripts }   from './modules/assignTranscripts'
 include { topTranscripts }      from './modules/topTranscripts'
 include { makeBed }             from './modules/makeBed'
 include { filterBam }           from './modules/filterBam'
@@ -43,15 +44,16 @@ inputDir = file("${params.inDir}", checkIfExists: true)
 // check for deduplication and get input bam file
 dedup = true
 
-bam_file = Channel
-  .fromPath("${params.inDir}/dedup/*rumi_dedup.sort.bam")
-  .ifEmpty { dedup = false }
+bam_file = file("${params.inDir}/dedup/*rumi_dedup.sort.bam")
 
-if (!dedup){
-  bam_file = Channel
-    .fromPath("${params.inDir}/star/*sortedByCoord.out.bam")
-    .ifEmpty { exit 1, "STAR BAM file not found" }
-    .into { bam1_ch; bam2_ch }
+if(bam_file.isEmpty()){
+ dedup = false
+ bam_file = file("${params.inDir}/star/*sortedByCoord.out.bam")
+}
+
+if(bam_file.isEmpty()){
+ print "bam file not found"
+ exit 1
 }
 
 
@@ -75,6 +77,7 @@ log.info summary.collect { k,v -> "${k.padRight(18)}: $v" }.join("\n")
 log.info "----------------------------------------------------"
 
 workflow {
+	assignGenes(namingprefix,bam_file,longRNAgtfFile)
         transcriptList(longRNAgtfFile)
         assignTranscripts(namingprefix,bam_file,longRNAgtfFile)
         topTranscripts(assignTranscripts.out.transcript_read_counts,transcriptList.out)
