@@ -12,7 +12,8 @@ RUN apt-get update && apt-get install -y \
     pigz \
     python \
     python3.6 \
-    python3-pip
+    python3-pip \
+    gawk
     
 ######### Python 3.9 #############   
 RUN apt-get update && apt-get install -y \

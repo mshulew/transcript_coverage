@@ -1,15 +1,18 @@
-# Transcript Coverage LSG0038
+# Transcript Coverage
 
-This pipeline was developed as a companion to gene_coverage_lsg0038 to support SEQuoia Express. It calculates the percent of bases of the top 1,000 expressed transcripts at different read coverages (0x - 20X). This pipeline was used in verification and validation and is being archived for reference. See improvements for bugs fixes for future use.
+This toolkit calculates the percent of bases of the top 1,000 expressed transcripts at different read coverages (0x - 20X). This toolkit is a companion for Bio-Rad's SEQuoia Express Toolkit, using the SEQuoia Express Toolkit output as its input. With slight modification to main.nf, it can be used for any BAM file with paired-end read alignments.
 
-Author: Mark Shulewitz 
+Author: Mark Shulewitz (markshulewitz@gmail.com)
 
-## Description of pipeline
-### assignTranscripts
-Run featureCounts using deduplicated BAM (if deduplication was performed) or STAR BAM (if no deduplication was performed) to assign reads to transcripts (note: reads can be assigned to more than 1 transcript)  
+## Description of main workflow (main.nf)
+### assignGened
+Runs featureCounts using deduplicated BAM (if deduplication was performed) or STAR BAM (if no deduplication was performed) to assign reads to genes. Output is filtered for alignments assigned to reads and is not piped to any downstream process in the toolkit - the BAM and indexed BAM files are for viewing on IGV or similar genome viewer.
 
 ### transcriptList
-Generates list of transcripts by gene from gtf annotation file  
+Generates list of transcripts by gene from gtf annotation file
+
+### assignTranscripts
+Runs featureCounts using deduplicated BAM (if deduplication was performed) or STAR BAM (if no deduplication was performed) to assign reads to transcripts (note: reads can be assigned to more than 1 transcript)   
 
 ### topTranscripts
 Generates a list of most highly expressed transcript for each gene with read counts for that transcript 
@@ -44,7 +47,7 @@ docker build -t transcripts_coverage:latest .
 ## Running the pipeline
 
 ```bash
-nextflow run transcript_coverage_lsg0038/main.nf --inDir /path/to/SEQuoia-Express/output/directory --outDir /path/to/output/directory
+nextflow run transcript_coveragemain.nf --inDir /path/to/SEQuoia-Express/output/directory --outDir /path/to/output/directory
 ```
 
 ## Description of output
@@ -76,12 +79,12 @@ topTranscripts > top_transcripts.tsv List of most highly expressed transcript fo
 transcriptList > transcriptlist.tsv - list of transcripts and corresponding gene from transcriptList process  
 
 
-
 ## Running pipeline without Docker
 
 It is possible to run this pipeline without Docker. Dockerfile can be used as a guide to install all of the required software in a Linux instance (python3.9, Subread, Bedtools, Sambamba). ADditional scripts (ie: bash and python scripts) are in the scr directory. main.nf can be used as a guide for the command lines that need to be run sequentially (command lines are in the script block for each process). 
 
 ## Additional resources
 
+- igv.nf is used to generate a file of percent GC content for IGV or a similar genome viewer. Run using command line nextflow transcript_coverage/igv.nf -profile docker --help for list of options.
 - The bash script topgene.sh can be used to compare the top 1,000 genes between processed data sets. 
 - The bash script batchprocess.sh can be used to sequentially process multiple SEQuoia Express Toolkit outputs.
